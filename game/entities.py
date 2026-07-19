@@ -20,10 +20,10 @@ class Paddle:
         elif keys[pygame.K_RIGHT]:
             self.vx = self.speed
         self.rect.x += self.vx
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
+        if self.rect.left < FIELD_LEFT:
+            self.rect.left = FIELD_LEFT
+        if self.rect.right > FIELD_RIGHT:
+            self.rect.right = FIELD_RIGHT
 
     def extend(self):
         if not self.extended:

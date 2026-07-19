@@ -11,7 +11,7 @@ from screens.gameover import run as gameover_screen
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Arcanoid")
+    pygame.display.set_caption("Arkanoid")
     clock = pygame.time.Clock()
     init_audio()
 

@@ -24,15 +24,16 @@ def load_level(filename):
                 if hp in (0, 1, 2):
                     bricks.append(Brick(c, r, hp))
 
-    # Автоматические границы (hp = -1)
+    # Автоматические границы (hp = -1) — всегда по краям игрового поля,
+    # независимо от ширины конкретного уровня
+    wall_rows = (HEIGHT - TOP_OFFSET) // BRICK_HEIGHT + 2
+
     # Верхняя стена (row = -1)
-    for c in range(cols):
+    for c in range(FIELD_COLS):
         bricks.append(Brick(c, -1, -1))
-    # Левая стена (col = -1)
-    for r in range(rows):
+    # Левая и правая стены — от верха до самого низа экрана
+    for r in range(-1, wall_rows):
         bricks.append(Brick(-1, r, -1))
-    # Правая стена (col = cols)
-    for r in range(rows):
-        bricks.append(Brick(cols, r, -1))
+        bricks.append(Brick(FIELD_COLS, r, -1))
 
     return bricks, rows, cols

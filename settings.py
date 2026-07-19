@@ -14,6 +14,10 @@ BRICK_WIDTH, BRICK_HEIGHT = 60, 20
 TOP_OFFSET = 60            # отступ сверху для UI и верхней границы
 FIELD_LEFT = 40            # левый отступ для кирпичей
 
+# Игровое поле фиксированного размера — не зависит от конкретного уровня
+FIELD_COLS = (WIDTH - 2 * FIELD_LEFT) // BRICK_WIDTH
+FIELD_RIGHT = FIELD_LEFT + FIELD_COLS * BRICK_WIDTH
+
 PADDLE_WIDTH, PADDLE_HEIGHT = 100, 12
 PADDLE_SPEED = 7
 
