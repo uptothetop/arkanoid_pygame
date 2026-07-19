@@ -5,6 +5,7 @@ import game.audio as audio
 from game.audio import toggle_sound, play_sound
 from screens.common import draw_button
 
+
 def run(screen, clock):
     title_font = pygame.font.Font(None, 48)
     button_font = pygame.font.Font(None, 36)

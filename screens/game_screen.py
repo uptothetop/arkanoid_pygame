@@ -9,11 +9,14 @@ from settings import *
 import game.audio as audio
 from game.entities import Paddle, Ball, Bonus, LaserBullet
 from game.level import load_level
+from game.particles import spawn_burst, update_particles, draw_particles
 
 LASER_COOLDOWN = 300  # мс между выстрелами
 
+
 def _new_ball(paddle):
     return Ball(paddle.rect.centerx, paddle.rect.top - BALL_RADIUS)
+
 
 def _bounce_off_rect(ball, rect):
     """Отталкивает мяч от прямоугольника rect, определяя сторону удара."""
@@ -36,67 +39,75 @@ def _bounce_off_rect(ball, rect):
         ball.rect.left = rect.right
         ball.vx *= -1
 
+
 def _handle_ball_vs_paddle(ball, paddle):
     """Отскок от платформы: угол вылета зависит от точки удара, а не только от стороны."""
     _bounce_off_rect(ball, paddle.rect)
     offset = (ball.rect.centerx - paddle.rect.centerx) / (paddle.rect.width / 2)
     ball.vx = max(-MAX_BALL_SPEED_X, min(MAX_BALL_SPEED_X, offset * MAX_BALL_SPEED_X))
 
-def _handle_ball_vs_bricks(ball, bricks, bonuses):
+
+def _handle_ball_vs_bricks(ball, bricks, bonuses, particles):
     """Отскакивает мяч от кирпичей, по пути разрушая их. Возвращает заработанные очки."""
     scored = 0
     for brick in bricks[:]:  # копия списка: brick.remove() ниже меняет оригинал
         if not ball.rect.colliderect(brick.rect):
             continue
         _bounce_off_rect(ball, brick.rect)
-        if brick.hp == -1:          # стена — неразрушима, только отскок
+        if brick.hp == -1:  # стена — неразрушима, только отскок
             continue
         bonus_type = brick.hit()
         audio.play_sound(audio.hit_sound)
-        if brick.hp <= 0:           # кирпич уничтожен
+        if brick.hp <= 0:  # кирпич уничтожен
             bricks.remove(brick)
             scored += 10
+            spawn_burst(particles, brick.rect.center, brick.color)
             if bonus_type:
                 bonuses.append(Bonus(brick.rect.center, bonus_type))
     return scored
 
-def _update_balls(balls, paddle, bricks, bonuses):
+
+def _update_balls(balls, paddle, bricks, bonuses, particles):
     """Двигает все мячи и обрабатывает их столкновения. Возвращает заработанные очки."""
     scored = 0
     for ball in balls[:]:
         ball.update()
         if ball.rect.colliderect(paddle.rect) and ball.vy > 0:
             _handle_ball_vs_paddle(ball, paddle)
-        scored += _handle_ball_vs_bricks(ball, bricks, bonuses)
-        if ball.rect.top > HEIGHT:   # мяч улетел за нижний край поля — потерян
+        scored += _handle_ball_vs_bricks(ball, bricks, bonuses, particles)
+        if ball.rect.top > HEIGHT:  # мяч улетел за нижний край поля — потерян
             balls.remove(ball)
     return scored
 
+
 def _apply_bonus(bonus_type, paddle, balls, lives):
     """Применяет эффект подобранного бонуса. Возвращает обновлённое число жизней."""
-    if bonus_type == 'extend':
+    if bonus_type == "extend":
         paddle.extend()
-    elif bonus_type == 'multiball':
+    elif bonus_type == "multiball":
         balls.append(_new_ball(paddle))
-    elif bonus_type == 'laser':
+    elif bonus_type == "laser":
         paddle.laser = True
-    elif bonus_type == 'extra_life':
+    elif bonus_type == "extra_life":
         lives += 1
     return lives
 
-def _update_bonuses(bonuses, paddle, balls, lives):
+
+def _update_bonuses(bonuses, paddle, balls, lives, particles):
     """Двигает падающие бонусы и ловит их платформой. Возвращает обновлённое число жизней."""
     for bonus in bonuses[:]:
         bonus.update()
         if bonus.rect.colliderect(paddle.rect):
             bonuses.remove(bonus)
             audio.play_sound(audio.bonus_sound)
+            spawn_burst(particles, bonus.rect.center, bonus.color, count=6)
             lives = _apply_bonus(bonus.type, paddle, balls, lives)
         elif bonus.rect.top > HEIGHT:
             bonuses.remove(bonus)
     return lives
 
-def _update_lasers(lasers, bricks, bonuses):
+
+def _update_lasers(lasers, bricks, bonuses, particles):
     """Двигает лазерные выстрелы и обрабатывает попадания в кирпичи. Возвращает очки."""
     scored = 0
     for laser in lasers[:]:
@@ -110,6 +121,7 @@ def _update_lasers(lasers, bricks, bonuses):
             if brick.hp <= 0:
                 bricks.remove(brick)
                 scored += 10
+                spawn_burst(particles, brick.rect.center, brick.color)
                 if bonus_type:
                     bonuses.append(Bonus(brick.rect.center, bonus_type))
             hit_brick = True
@@ -118,11 +130,13 @@ def _update_lasers(lasers, bricks, bonuses):
             lasers.remove(laser)
     return scored
 
+
 def _level_cleared(bricks):
     """Уровень пройден, когда среди кирпичей остались только неразрушимые стены (hp == -1)."""
     return not any(brick.hp != -1 for brick in bricks)
 
-def _draw_frame(screen, font, paddle, balls, bricks, bonuses, lasers, score, lives):
+
+def _draw_frame(screen, font, paddle, balls, bricks, bonuses, lasers, particles, score, lives):
     screen.fill(BLACK)
     paddle.draw(screen)
     for ball in balls:
@@ -133,9 +147,11 @@ def _draw_frame(screen, font, paddle, balls, bricks, bonuses, lasers, score, liv
         bonus.draw(screen)
     for laser in lasers:
         laser.draw(screen)
+    draw_particles(screen, particles)
 
     hud = font.render(f"Очки: {score}   Жизни: {lives}", True, WHITE)
     screen.blit(hud, (10, 10))
+
 
 def run(screen, clock, level):
     font = pygame.font.Font(None, 36)
@@ -145,6 +161,7 @@ def run(screen, clock, level):
     balls = [_new_ball(paddle)]
     bonuses = []
     lasers = []
+    particles = []
     lives = 3
     score = 0
     last_shot = 0
@@ -162,7 +179,7 @@ def run(screen, clock, level):
             lasers.append(LaserBullet(paddle.rect.centerx, paddle.rect.top))
             last_shot = now
 
-        score += _update_balls(balls, paddle, bricks, bonuses)
+        score += _update_balls(balls, paddle, bricks, bonuses, particles)
 
         if not balls:
             lives -= 1
@@ -170,12 +187,13 @@ def run(screen, clock, level):
                 return GAMEOVER
             balls.append(_new_ball(paddle))
 
-        lives = _update_bonuses(bonuses, paddle, balls, lives)
-        score += _update_lasers(lasers, bricks, bonuses)
+        lives = _update_bonuses(bonuses, paddle, balls, lives, particles)
+        score += _update_lasers(lasers, bricks, bonuses, particles)
+        update_particles(particles)
 
         if _level_cleared(bricks):
             return WIN
 
-        _draw_frame(screen, font, paddle, balls, bricks, bonuses, lasers, score, lives)
+        _draw_frame(screen, font, paddle, balls, bricks, bonuses, lasers, particles, score, lives)
         pygame.display.flip()
         clock.tick(FPS)

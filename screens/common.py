@@ -7,11 +7,13 @@
 import pygame
 from settings import *
 
+
 def draw_button(screen, rect, text, font, color=GRAY, text_color=WHITE):
     """Рисует прямоугольную кнопку с текстом по центру."""
     pygame.draw.rect(screen, color, rect, border_radius=8)
     label = font.render(text, True, text_color)
     screen.blit(label, label.get_rect(center=rect.center))
+
 
 def result_screen(screen, clock, title_text, title_color):
     """

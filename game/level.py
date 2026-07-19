@@ -2,13 +2,14 @@
 from settings import *
 from game.entities import Brick
 
+
 def load_level(filename):
     """
     Читает файл уровня, возвращает список кирпичей (включая автоматические стены),
     количество строк и столбцов сетки.
     """
     bricks = []
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
     rows = len(lines)
     cols = max(len(line.split()) for line in lines)
@@ -17,9 +18,9 @@ def load_level(filename):
     for r, line in enumerate(lines):
         tokens = line.split()
         for c, token in enumerate(tokens):
-            if token == '.':      # пустое место
+            if token == ".":  # пустое место
                 continue
-            if token.isdigit() or (token.startswith('-') and token[1:].isdigit()):
+            if token.isdigit() or (token.startswith("-") and token[1:].isdigit()):
                 hp = int(token)
                 if hp in (0, 1, 2):
                     bricks.append(Brick(c, r, hp))

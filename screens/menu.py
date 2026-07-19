@@ -4,6 +4,7 @@ from settings import *
 from game.audio import play_music
 from screens.common import draw_button
 
+
 def run(screen, clock):
     play_music()
     title_font = pygame.font.Font(None, 74)
