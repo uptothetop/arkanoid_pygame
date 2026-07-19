@@ -2,6 +2,14 @@
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 
+# Состояния конечного автомата экранов
+MAIN_MENU = 0
+SETTINGS = 1
+GAME = 2
+WIN = 3
+GAMEOVER = 4
+QUIT = 5
+
 BRICK_WIDTH, BRICK_HEIGHT = 60, 20
 TOP_OFFSET = 60            # отступ сверху для UI и верхней границы
 FIELD_LEFT = 40            # левый отступ для кирпичей

@@ -1,27 +1,45 @@
+# main.py – точка входа, конечный автомат экранов
 import pygame
 from settings import *
+from game.audio import init_audio, stop_music
+from screens.menu import run as menu_screen
+from screens.settings import run as settings_screen
+from screens.game_screen import run as game_screen
+from screens.win import run as win_screen
+from screens.gameover import run as gameover_screen
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Arkanoid")
+    pygame.display.set_caption("Arcanoid")
     clock = pygame.time.Clock()
+    init_audio()
 
-    running = True
-    while running:
-        # Обработка событий
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:   # нажатие на крестик
-                running = False
+    state = MAIN_MENU
+    level = 1
 
-        # Заливка фона (пока чёрный)
-        screen.fill(BLACK)
+    while state != QUIT:
+        if state == MAIN_MENU:
+            state = menu_screen(screen, clock)
+            if state == GAME:
+                level = 1   # начинаем с первого уровня
+        elif state == SETTINGS:
+            state = settings_screen(screen, clock)
+        elif state == GAME:
+            state = game_screen(screen, clock, level)
+            if state == WIN:
+                # тут можно переходить на следующий уровень, если есть
+                state = WIN
+            elif state == GAMEOVER:
+                state = GAMEOVER
+        elif state == WIN:
+            state = win_screen(screen, clock)
+        elif state == GAMEOVER:
+            state = gameover_screen(screen, clock)
+        else:
+            state = QUIT
 
-        # Здесь будет отрисовка объектов
-
-        pygame.display.flip()   # обновление экрана
-        clock.tick(FPS)         # ограничение FPS
-
+    stop_music()
     pygame.quit()
 
 if __name__ == "__main__":
