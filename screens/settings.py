@@ -1,12 +1,14 @@
-# screens/settings.py – настройки звука
+"""screens/settings.py – настройки звука."""
+
 import pygame
-from settings import *
+
 import game.audio as audio
-from game.audio import toggle_sound, play_sound
+import settings as cfg
+from game.states import GameState
 from screens.common import draw_button
 
 
-def run(screen, clock):
+def run(screen: pygame.Surface, clock: pygame.time.Clock) -> GameState:
     title_font = pygame.font.Font(None, 48)
     button_font = pygame.font.Font(None, 36)
 
@@ -16,21 +18,21 @@ def run(screen, clock):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return QUIT
+                return GameState.QUIT
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if back_btn.collidepoint(event.pos):
-                    return MAIN_MENU
+                    return GameState.MAIN_MENU
                 if toggle_btn.collidepoint(event.pos):
-                    toggle_sound()
-                    play_sound(audio.hit_sound)  # звук клика для проверки
+                    audio.toggle_sound()
+                    audio.play_sound(audio.hit_sound)  # звук клика для проверки
 
-        screen.fill(BLACK)
-        title = title_font.render("Настройки", True, WHITE)
-        screen.blit(title, title.get_rect(centerx=WIDTH // 2, y=100))
+        screen.fill(cfg.BLACK)
+        title = title_font.render("Настройки", True, cfg.WHITE)
+        screen.blit(title, title.get_rect(centerx=cfg.WIDTH // 2, y=100))
 
         sound_text = "Звук: ВКЛ" if audio.sound_enabled else "Звук: ВЫКЛ"
         draw_button(screen, toggle_btn, sound_text, button_font)
         draw_button(screen, back_btn, "Назад", button_font)
 
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(cfg.FPS)

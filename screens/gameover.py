@@ -1,7 +1,11 @@
-# screens/gameover.py – экран поражения
-from settings import RED
+"""screens/gameover.py – экран поражения."""
+
+import pygame
+
+import settings as cfg
+from game.states import GameState
 from screens.common import result_screen
 
 
-def run(screen, clock):
-    return result_screen(screen, clock, "GAME OVER", RED)
+def run(screen: pygame.Surface, clock: pygame.time.Clock) -> GameState:
+    return result_screen(screen, clock, "GAME OVER", cfg.RED)

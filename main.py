@@ -1,47 +1,51 @@
-# main.py – точка входа, конечный автомат экранов
-#
-# Каждый экран — это функция run(screen, clock) -> следующее состояние
-# (экран GAME дополнительно принимает номер уровня). Главный цикл просто
-# вызывает функцию текущего состояния и переходит в то состояние, которое
-# она вернула.
+"""main.py – точка входа: конечный автомат экранов.
+
+Каждый экран — это функция run(screen, clock) -> следующее состояние
+(экран GAME дополнительно принимает номер уровня). Главный цикл просто
+вызывает функцию текущего состояния и переходит в то состояние, которое
+она вернула.
+"""
+
 import pygame
-from settings import *
-from game.audio import init_audio, stop_music
+
+import game.audio as audio
+import settings as cfg
+from game.states import GameState
+from screens.game_screen import run as game_screen
+from screens.gameover import run as gameover_screen
 from screens.menu import run as menu_screen
 from screens.settings import run as settings_screen
-from screens.game_screen import run as game_screen
 from screens.win import run as win_screen
-from screens.gameover import run as gameover_screen
 
 
-def main():
+def main() -> None:
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((cfg.WIDTH, cfg.HEIGHT))
     pygame.display.set_caption("Arkanoid")
     clock = pygame.time.Clock()
-    init_audio()
+    audio.init_audio()
 
-    state = MAIN_MENU
+    state = GameState.MAIN_MENU
     level = 1
 
-    while state != QUIT:
-        if state == MAIN_MENU:
+    while state != GameState.QUIT:
+        if state == GameState.MAIN_MENU:
             state = menu_screen(screen, clock)
-            if state == GAME:
+            if state == GameState.GAME:
                 level = 1  # начинаем с первого уровня
-        elif state == SETTINGS:
+        elif state == GameState.SETTINGS:
             state = settings_screen(screen, clock)
-        elif state == GAME:
+        elif state == GameState.GAME:
             # TODO: при переходе в WIN можно увеличивать level, если появятся новые уровни
             state = game_screen(screen, clock, level)
-        elif state == WIN:
+        elif state == GameState.WIN:
             state = win_screen(screen, clock)
-        elif state == GAMEOVER:
+        elif state == GameState.GAMEOVER:
             state = gameover_screen(screen, clock)
         else:
-            state = QUIT
+            state = GameState.QUIT
 
-    stop_music()
+    audio.stop_music()
     pygame.quit()
 
 
