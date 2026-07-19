@@ -1,4 +1,9 @@
 # main.py – точка входа, конечный автомат экранов
+#
+# Каждый экран — это функция run(screen, clock) -> следующее состояние
+# (экран GAME дополнительно принимает номер уровня). Главный цикл просто
+# вызывает функцию текущего состояния и переходит в то состояние, которое
+# она вернула.
 import pygame
 from settings import *
 from game.audio import init_audio, stop_music
@@ -26,12 +31,8 @@ def main():
         elif state == SETTINGS:
             state = settings_screen(screen, clock)
         elif state == GAME:
+            # TODO: при переходе в WIN можно увеличивать level, если появятся новые уровни
             state = game_screen(screen, clock, level)
-            if state == WIN:
-                # тут можно переходить на следующий уровень, если есть
-                state = WIN
-            elif state == GAMEOVER:
-                state = GAMEOVER
         elif state == WIN:
             state = win_screen(screen, clock)
         elif state == GAMEOVER:

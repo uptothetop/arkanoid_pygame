@@ -5,6 +5,8 @@ from settings import *
 from game.audio import play_sound
 
 class Paddle:
+    """Платформа игрока: двигается по горизонтали и ловит мяч."""
+
     def __init__(self):
         self.rect = pygame.Rect(0, 0, PADDLE_WIDTH, PADDLE_HEIGHT)
         self.rect.midbottom = (WIDTH // 2, HEIGHT - 20)
@@ -39,13 +41,14 @@ class Paddle:
         pygame.draw.rect(screen, PADDLE_COLOR, self.rect, border_radius=5)
 
 class Ball:
+    """Мяч: летит по прямой между столкновениями, отскакивая от rect'ов."""
+
     def __init__(self, x, y):
         self.radius = BALL_RADIUS
         self.rect = pygame.Rect(x - self.radius, y - self.radius,
                                 2*self.radius, 2*self.radius)
         self.vx = BALL_SPEED_X
         self.vy = BALL_SPEED_Y
-        self.alive = True
 
     def update(self):
         self.rect.x += self.vx
@@ -55,8 +58,15 @@ class Ball:
         pygame.draw.circle(screen, BALL_COLOR, self.rect.center, self.radius)
 
 class Brick:
+    """
+    Один кирпич сетки уровня.
+    hp = -1  → стена, неразрушима
+    hp =  0  → разрушается с одного удара
+    hp =  1, 2 → выдерживает несколько ударов, меняя цвет
+    """
+
     def __init__(self, col, row, hp):
-        self.hp = hp          # -1, 0, 1, 2
+        self.hp = hp
         self.max_hp = hp if hp > 0 else 0
         self.color = BRICK_COLORS[hp]
         self.rect = pygame.Rect(
@@ -83,6 +93,8 @@ class Brick:
         pygame.draw.rect(screen, DARK_GRAY, self.rect, 2)  # рамка
 
 class Bonus:
+    """Бонус, выпавший из разрушенного кирпича; падает вниз, пока его не поймает платформа."""
+
     TYPES = {
         'extend':     {'color': GREEN,   'letter': 'E'},
         'multiball':  {'color': MAGENTA, 'letter': 'M'},
@@ -109,6 +121,8 @@ class Bonus:
         screen.blit(text, text.get_rect(center=self.rect.center))
 
 class LaserBullet:
+    """Выстрел платформы после подбора бонуса 'laser'; летит вверх и разрушает кирпичи."""
+
     def __init__(self, x, y):
         self.rect = pygame.Rect(x - 2, y, 4, 10)
         self.vy = -10

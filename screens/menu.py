@@ -2,17 +2,19 @@
 import pygame
 from settings import *
 from game.audio import play_music
+from screens.common import draw_button
 
 def run(screen, clock):
     play_music()
-    font = pygame.font.Font(None, 74)
-    title = font.render("ARCANOID", True, WHITE)
-    font_small = pygame.font.Font(None, 36)
+    title_font = pygame.font.Font(None, 74)
+    button_font = pygame.font.Font(None, 36)
+    title = title_font.render("ARCANOID", True, WHITE)
 
+    # У каждой кнопки уже записано, в какое состояние переходить по клику
     buttons = [
-        {"text": "Играть", "rect": pygame.Rect(300, 250, 200, 50)},
-        {"text": "Настройки", "rect": pygame.Rect(300, 320, 200, 50)},
-        {"text": "Выход", "rect": pygame.Rect(300, 390, 200, 50)},
+        ("Играть", pygame.Rect(300, 250, 200, 50), GAME),
+        ("Настройки", pygame.Rect(300, 320, 200, 50), SETTINGS),
+        ("Выход", pygame.Rect(300, 390, 200, 50), QUIT),
     ]
 
     while True:
@@ -20,21 +22,14 @@ def run(screen, clock):
             if event.type == pygame.QUIT:
                 return QUIT
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                pos = pygame.mouse.get_pos()
-                for btn in buttons:
-                    if btn["rect"].collidepoint(pos):
-                        if btn["text"] == "Играть":
-                            return GAME
-                        elif btn["text"] == "Настройки":
-                            return SETTINGS
-                        elif btn["text"] == "Выход":
-                            return QUIT
+                for _text, rect, next_state in buttons:
+                    if rect.collidepoint(event.pos):
+                        return next_state
 
         screen.fill(BLACK)
-        screen.blit(title, title.get_rect(centerx=WIDTH//2, y=100))
-        for btn in buttons:
-            pygame.draw.rect(screen, GRAY, btn["rect"], border_radius=8)
-            text = font_small.render(btn["text"], True, WHITE)
-            screen.blit(text, text.get_rect(center=btn["rect"].center))
+        screen.blit(title, title.get_rect(centerx=WIDTH // 2, y=100))
+        for text, rect, _next_state in buttons:
+            draw_button(screen, rect, text, button_font)
+
         pygame.display.flip()
         clock.tick(FPS)
