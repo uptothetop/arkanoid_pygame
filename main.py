@@ -1,9 +1,9 @@
 import pygame
-from settings import *
+import settings as cfg
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((cfg.WIDTH, cfg.HEIGHT))
     pygame.display.set_caption("Arkanoid")
     clock = pygame.time.Clock()
 
@@ -14,10 +14,10 @@ def main():
             if event.type == pygame.QUIT:   # Press "close" button
                 running = False
 
-        screen.fill(BLACK)
+        screen.fill(cfg.BLACK)
 
         pygame.display.flip()   # Screen Update
-        clock.tick(FPS)         # FPS (Frames Per Second)
+        clock.tick(cfg.FPS)         # FPS (Frames Per Second)
 
     pygame.quit()
 
