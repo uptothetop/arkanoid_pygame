@@ -1,4 +1,4 @@
-"""screens/menu.py – главное меню."""
+"""screens/menu.py – Main menu Screen."""
 
 import pygame
 
@@ -14,11 +14,10 @@ def run(screen: pygame.Surface, clock: pygame.time.Clock) -> GameState:
     button_font = pygame.font.Font(None, 36)
     title = title_font.render("ARCANOID", True, cfg.WHITE)
 
-    # У каждой кнопки уже записано, в какое состояние переходить по клику
     buttons = [
-        ("Играть", pygame.Rect(300, 250, 200, 50), GameState.GAME),
-        ("Настройки", pygame.Rect(300, 320, 200, 50), GameState.SETTINGS),
-        ("Выход", pygame.Rect(300, 390, 200, 50), GameState.QUIT),
+        ("Play", pygame.Rect(300, 250, 200, 50), GameState.GAME),
+        ("Settings", pygame.Rect(300, 320, 200, 50), GameState.SETTINGS),
+        ("Exit", pygame.Rect(300, 390, 200, 50), GameState.QUIT),
     ]
 
     while True:

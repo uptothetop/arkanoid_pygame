@@ -1,9 +1,6 @@
-"""screens/game_screen.py – основной игровой экран.
+"""screens/game_screen.py – main game screen.
 
-run() описывает один кадр игры на самом верхнем уровне: ввод -> мячи ->
-бонусы -> лазеры -> проверка победы -> отрисовка. Вся "механика" каждого
-шага вынесена в отдельные функции ниже, чтобы run() можно было читать как
-оглавление, а не как одну большую простыню кода.
+Contains all the game logic and physics
 """
 
 import pygame
@@ -15,7 +12,7 @@ from game.level import load_level
 from game.particles import Particle, draw_particles, spawn_burst, update_particles
 from game.states import GameState
 
-LASER_COOLDOWN = 300  # мс между выстрелами
+LASER_COOLDOWN = 300 # msec
 
 
 def _new_ball(paddle: Paddle) -> Ball:
@@ -23,7 +20,7 @@ def _new_ball(paddle: Paddle) -> Ball:
 
 
 def _bounce_off_rect(ball: Ball, rect: pygame.Rect) -> None:
-    """Отталкивает мяч от прямоугольника rect, определяя сторону удара."""
+    """Bounces off the ball form the given rect."""
     overlap_left = ball.rect.right - rect.left
     overlap_right = rect.right - ball.rect.left
     overlap_top = ball.rect.bottom - rect.top
@@ -45,7 +42,7 @@ def _bounce_off_rect(ball: Ball, rect: pygame.Rect) -> None:
 
 
 def _handle_ball_vs_paddle(ball: Ball, paddle: Paddle) -> None:
-    """Отскок от платформы: угол вылета зависит от точки удара, а не только от стороны."""
+    """Bounces the ball from the Paddle."""
     _bounce_off_rect(ball, paddle.rect)
     offset = (ball.rect.centerx - paddle.rect.centerx) / (paddle.rect.width / 2)
     max_vx = cfg.MAX_BALL_SPEED_X
@@ -58,17 +55,17 @@ def _handle_ball_vs_bricks(
     bonuses: list[Bonus],
     particles: list[Particle],
 ) -> int:
-    """Отскакивает мяч от кирпичей, по пути разрушая их. Возвращает заработанные очки."""
+    """Handles the ball bouncong off the bricks. Returns score"""
     scored = 0
-    for brick in bricks[:]:  # копия списка: bricks.remove() ниже меняет оригинал
+    for brick in bricks[:]:
         if not ball.rect.colliderect(brick.rect):
             continue
         _bounce_off_rect(ball, brick.rect)
-        if brick.hp == -1:  # стена — неразрушима, только отскок
+        if brick.hp == -1:  # indestructable
             continue
         bonus_type = brick.hit()
         audio.play_sound(audio.hit_sound)
-        if brick.hp <= 0:  # кирпич уничтожен
+        if brick.hp <= 0:  # The brick is destroyed
             bricks.remove(brick)
             scored += 10
             spawn_burst(particles, brick.rect.center, brick.color)
@@ -84,20 +81,20 @@ def _update_balls(
     bonuses: list[Bonus],
     particles: list[Particle],
 ) -> int:
-    """Двигает все мячи и обрабатывает их столкновения. Возвращает заработанные очки."""
+    """ Updates all the balls, returns score."""
     scored = 0
     for ball in balls[:]:
         ball.update()
         if ball.rect.colliderect(paddle.rect) and ball.vy > 0:
             _handle_ball_vs_paddle(ball, paddle)
         scored += _handle_ball_vs_bricks(ball, bricks, bonuses, particles)
-        if ball.rect.top > cfg.HEIGHT:  # мяч улетел за нижний край поля — потерян
+        if ball.rect.top > cfg.HEIGHT:  # Life is lost
             balls.remove(ball)
     return scored
 
 
 def _apply_bonus(bonus_type: str, paddle: Paddle, balls: list[Ball], lives: int) -> int:
-    """Применяет эффект подобранного бонуса. Возвращает обновлённое число жизней."""
+    """ Applies the bonus effect """
     if bonus_type == "extend":
         paddle.extend()
     elif bonus_type == "multiball":
@@ -116,7 +113,7 @@ def _update_bonuses(
     lives: int,
     particles: list[Particle],
 ) -> int:
-    """Двигает падающие бонусы и ловит их платформой. Возвращает обновлённое число жизней."""
+    """ Updates bonuses position, handles Paddle catch logic, returns number of lives. """
     for bonus in bonuses[:]:
         bonus.update()
         if bonus.rect.colliderect(paddle.rect):
@@ -135,7 +132,7 @@ def _update_lasers(
     bonuses: list[Bonus],
     particles: list[Particle],
 ) -> int:
-    """Двигает лазерные выстрелы и обрабатывает попадания в кирпичи. Возвращает очки."""
+    """ Handles laser's shots. """
     scored = 0
     for laser in lasers[:]:
         laser.update()
@@ -159,7 +156,7 @@ def _update_lasers(
 
 
 def _level_cleared(bricks: list[Brick]) -> bool:
-    """Уровень пройден, когда среди кирпичей остались только неразрушимые стены (hp == -1)."""
+    """ Checks if the level is completed (e.g. there are only indestructable bricks)."""
     return not any(brick.hp != -1 for brick in bricks)
 
 
@@ -187,7 +184,7 @@ def _draw_frame(
         laser.draw(screen)
     draw_particles(screen, particles)
 
-    hud = font.render(f"Очки: {score}   Жизни: {lives}", True, cfg.WHITE)
+    hud = font.render(f"Points: {score}   Lives: {lives}", True, cfg.WHITE)
     screen.blit(hud, (10, 10))
 
 

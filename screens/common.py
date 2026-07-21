@@ -1,9 +1,6 @@
-"""screens/common.py – общие для всех экранов вспомогательные функции.
+"""screens/common.py 
 
-menu.py, settings.py, win.py и gameover.py устроены одинаково: залить фон,
-нарисовать пару кнопок-прямоугольников с подписью и подождать клика. Этот
-модуль вынесен, чтобы не повторять код рисования кнопки и целый
-экран-результат в каждом файле.
+Module with common functions that could be shared across screens
 """
 
 import pygame
@@ -22,7 +19,7 @@ def draw_button(
     color: Color = cfg.GRAY,
     text_color: Color = cfg.WHITE,
 ) -> None:
-    """Рисует прямоугольную кнопку с текстом по центру."""
+    """ Draws a rect button with text. """
     pygame.draw.rect(screen, color, rect, border_radius=8)
     label = font.render(text, True, text_color)
     screen.blit(label, label.get_rect(center=rect.center))
@@ -35,9 +32,7 @@ def result_screen(
     title_color: Color,
 ) -> GameState:
     """
-    Экран-заглушка с крупным заголовком и кнопкой "В меню".
-    Общий код для экранов победы (win.py) и поражения (gameover.py) —
-    они отличаются только текстом и цветом заголовка.
+    Common screen with text and "Back to the menu" button
     """
     title_font = pygame.font.Font(None, 74)
     button_font = pygame.font.Font(None, 36)
@@ -57,7 +52,7 @@ def result_screen(
         screen.fill(cfg.BLACK)
         title = title_font.render(title_text, True, title_color)
         screen.blit(title, title.get_rect(centerx=cfg.WIDTH // 2, y=150))
-        draw_button(screen, menu_btn, "В меню", button_font)
+        draw_button(screen, menu_btn, "Menu", button_font)
 
         pygame.display.flip()
         clock.tick(cfg.FPS)

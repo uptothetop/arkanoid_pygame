@@ -1,4 +1,4 @@
-"""screens/win.py – экран победы."""
+"""screens/win.py – Win screen."""
 
 import pygame
 
@@ -8,4 +8,4 @@ from screens.common import result_screen
 
 
 def run(screen: pygame.Surface, clock: pygame.time.Clock) -> GameState:
-    return result_screen(screen, clock, "ПОБЕДА!", cfg.GREEN)
+    return result_screen(screen, clock, "You Win!", cfg.GREEN)

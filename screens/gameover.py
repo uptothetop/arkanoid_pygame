@@ -1,4 +1,4 @@
-"""screens/gameover.py – экран поражения."""
+"""screens/gameover.py – Game Over Screen."""
 
 import pygame
 

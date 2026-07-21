@@ -1,10 +1,4 @@
-"""main.py – точка входа: конечный автомат экранов.
-
-Каждый экран — это функция run(screen, clock) -> следующее состояние
-(экран GAME дополнительно принимает номер уровня). Главный цикл просто
-вызывает функцию текущего состояния и переходит в то состояние, которое
-она вернула.
-"""
+"""main.py – main game entry"""
 
 import pygame
 
@@ -32,11 +26,11 @@ def main() -> None:
         if state == GameState.MAIN_MENU:
             state = menu_screen(screen, clock)
             if state == GameState.GAME:
-                level = 1  # начинаем с первого уровня
+                level = 1  # 
         elif state == GameState.SETTINGS:
             state = settings_screen(screen, clock)
         elif state == GameState.GAME:
-            # TODO: при переходе в WIN можно увеличивать level, если появятся новые уровни
+            # TODO: increase level #
             state = game_screen(screen, clock, level)
         elif state == GameState.WIN:
             state = win_screen(screen, clock)

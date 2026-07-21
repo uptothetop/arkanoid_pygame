@@ -1,12 +1,4 @@
-"""game/particles.py – частицы для эффектов разрушения (пиксельные искры).
-
-Частиц может быть много одновременно (несколько мячей/лазеров одновременно
-бьют по кирпичам), поэтому важны простые решения:
-  - Particle использует __slots__ — без __dict__ на каждый экземпляр;
-  - затухание делается уменьшением размера, а не альфа-смешиванием — не
-    нужна отдельная поверхность с SRCALPHA, которая заметно дороже обычного
-    pygame.draw.rect на CPU-рендере pygame;
-  - общее число частиц ограничено MAX_PARTICLES.
+"""game/particles.py – Pixelated particles for the VFX
 """
 
 import math
@@ -56,17 +48,17 @@ def spawn_burst(
     color: Color,
     count: int = cfg.PARTICLE_COUNT,
 ) -> None:
-    """Добавляет count частиц в список particles (список изменяется на месте)."""
+    """ Adds count to the particles list. """
     x, y = center
     particles.extend(Particle(x, y, color) for _ in range(count))
     overflow = len(particles) - cfg.MAX_PARTICLES
     if overflow > 0:
-        del particles[:overflow]  # первыми гаснут самые старые частицы
+        del particles[:overflow] 
 
 
 def update_particles(particles: list[Particle]) -> None:
-    """Обновляет частицы на месте и убирает умершие."""
-    for particle in particles[:]:  # копия списка: remove() ниже меняет оригинал
+    """ Updates patricles and removes dead ones. """
+    for particle in particles[:]:
         particle.update()
         if not particle.alive:
             particles.remove(particle)

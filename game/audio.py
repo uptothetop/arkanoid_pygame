@@ -1,15 +1,10 @@
-"""game/audio.py – менеджер звуков."""
+"""game/audio.py – audio manager."""
 
 import pygame
 
 import settings as cfg
 
-sound_enabled = True  # глобальный флаг, меняется из настроек
-
-# Заранее объявлены как None: реальные Sound-объекты создаются только внутри
-# init_audio() (там, где уже вызван pygame.mixer.init()). Без этой заглушки
-# "import game.audio as audio; audio.hit_sound" падал бы с AttributeError,
-# если обратиться к нему раньше, чем main() успевает вызвать init_audio().
+sound_enabled = True  
 hit_sound: pygame.mixer.Sound | None = None
 bonus_sound: pygame.mixer.Sound | None = None
 laser_sound: pygame.mixer.Sound | None = None
@@ -23,7 +18,7 @@ def init_audio() -> None:
         bonus_sound = pygame.mixer.Sound(cfg.ASSETS_DIR / "bonus.mp3")
         laser_sound = pygame.mixer.Sound(cfg.ASSETS_DIR / "laser.mp3")
     except pygame.error:
-        print("Не удалось загрузить звуки, проверьте файлы в assets/")
+        print("Error loading sounds, please check the assets/ folder")
 
 
 def play_sound(sound: pygame.mixer.Sound | None) -> None:
@@ -35,7 +30,7 @@ def play_music() -> None:
     if sound_enabled:
         pygame.mixer.music.load(cfg.ASSETS_DIR / "music.mp3")
         pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)  # бесконечно
+        pygame.mixer.music.play(-1)  # Infinite
 
 
 def stop_music() -> None:

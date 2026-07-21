@@ -1,4 +1,4 @@
-"""game/entities.py – игровые объекты: платформа, мяч, кирпичи, бонусы, лазер."""
+"""game/entities.py – basic game entities."""
 
 import random
 from collections import deque
@@ -9,7 +9,7 @@ import settings as cfg
 
 
 class Paddle:
-    """Платформа игрока: двигается по горизонтали и ловит мяч."""
+    """ Paddle actor: moves horizontally and bounces off the ball. """
 
     def __init__(self) -> None:
         self.rect = pygame.Rect(0, 0, cfg.PADDLE_WIDTH, cfg.PADDLE_HEIGHT)
@@ -46,15 +46,14 @@ class Paddle:
 
 
 class Ball:
-    """Мяч: летит по прямой между столкновениями, отскакивая от rect'ов."""
+    """ Ball: basic physics, bounces off the rects. """
 
     def __init__(self, x: int, y: int) -> None:
         self.radius = cfg.BALL_RADIUS
         self.rect = pygame.Rect(x - self.radius, y - self.radius, 2 * self.radius, 2 * self.radius)
         self.vx = cfg.BALL_SPEED_X
         self.vy = cfg.BALL_SPEED_Y
-        # deque(maxlen=...) сам выкидывает старые точки за O(1) — не нужно
-        # вручную обрезать список кадр за кадром, как пришлось бы с list.pop(0)
+
         self.trail: deque[tuple[int, int]] = deque(maxlen=cfg.TRAIL_LENGTH)
 
     def update(self) -> None:
@@ -65,19 +64,15 @@ class Ball:
     def draw(self, screen: pygame.Surface) -> None:
         trail_len = len(self.trail)
         for i, pos in enumerate(self.trail):
-            fade = (i + 1) / (trail_len + 1)  # старые точки темнее
+            fade = (i + 1) / (trail_len + 1) 
             color = tuple(int(channel * fade) for channel in cfg.BALL_COLOR)
-            radius = max(1, round(self.radius * fade))
-            pygame.draw.circle(screen, color, pos, radius)
+            pygame.draw.circle(screen, color, pos, self.radius)
         pygame.draw.circle(screen, cfg.BALL_COLOR, self.rect.center, self.radius)
 
 
 class Brick:
     """
-    Один кирпич сетки уровня.
-    hp = -1     → стена, неразрушима
-    hp =  0     → разрушается с одного удара
-    hp =  1, 2  → выдерживает несколько ударов, меняя цвет
+    Brick object, level boundary.
     """
 
     def __init__(self, col: int, row: int, hp: int) -> None:
@@ -92,13 +87,13 @@ class Brick:
         )
 
     def hit(self) -> str | None:
-        """Удар по кирпичу. Возвращает тип бонуса или None."""
-        if self.hp > 0:  # только разрушаемые
+        """Handles the Brick hit. Returns bonus type or None."""
+        if self.hp > 0:
             self.hp -= 1
             if self.hp > 0:
                 self.color = cfg.BRICK_COLORS[self.hp]
                 return None
-            # hp стало 0 — кирпич уничтожен, есть шанс выпадения бонуса
+            # Brick is destroyed, there's a chance to drop a bonus
             if random.random() < cfg.BONUS_PROBABILITY:
                 return random.choice(cfg.BONUS_TYPES)
         return None
@@ -109,7 +104,7 @@ class Brick:
 
 
 class Bonus:
-    """Бонус, выпавший из разрушенного кирпича; падает вниз, пока его не поймает платформа."""
+    """ Bonus emitted from a destroyed block. """
 
     TYPES = {
         "extend": {"color": cfg.GREEN, "letter": "E"},
@@ -118,7 +113,7 @@ class Bonus:
         "extra_life": {"color": cfg.CYAN, "letter": "1"},
     }
 
-    _label_font: pygame.font.Font | None = None  # создаётся лениво, см. _get_label_font
+    _label_font: pygame.font.Font | None = None  # Lazy Creation
 
     def __init__(self, center: tuple[int, int], bonus_type: str) -> None:
         self.type = bonus_type
@@ -131,9 +126,6 @@ class Bonus:
 
     @classmethod
     def _get_label_font(cls) -> pygame.font.Font:
-        # pygame.font.Font(...) нельзя создать до pygame.init(), поэтому его
-        # нельзя объявить прямо в теле класса при импорте модуля — только
-        # лениво, при первом реальном вызове draw().
         if cls._label_font is None:
             cls._label_font = pygame.font.Font(None, 24)
         return cls._label_font
@@ -148,7 +140,7 @@ class Bonus:
 
 
 class LaserBullet:
-    """Выстрел платформы после подбора бонуса 'laser'; летит вверх и разрушает кирпичи."""
+    """ Laser Bullet, flies upwards and destroys bricks. """
 
     def __init__(self, x: int, y: int) -> None:
         self.rect = pygame.Rect(x - 2, y, 4, 10)
